@@ -1,0 +1,739 @@
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+% \usepackage[showframe]{geometry} %调整页边距showframe显示框架
+\usepackage{amsmath}  %数学环境
+\usepackage{paralist,bbding,pifont} %罗列环境
+\usepackage{lmodern}  %中文环境与amsmath格式冲突
+\usepackage{array,graphicx}  %插入表格、图片
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{appendix}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{tocloft}  %目录
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{setspace}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\renewcommand\cftsecdotsep{\cftdotsep}
+\renewcommand\cftsecleader{\cftdotfill{\cftsecdotsep}}
+\renewcommand {\cftdot}{$ \cdot $}
+\renewcommand {\cftdotsep}{1.5}
+\hypersetup{colorlinks=true,linkcolor=black}
+\usepackage[a4paper, portrait, margin=2.5cm]{geometry}
+\renewcommand{\baselinestretch}{1.25} %行间距取多倍行距（设置值为1.5）
+\setlength{\baselineskip}{20pt} 
+\usepackage{tikz}
+%\documentclass[tikz]{stanalone}	% 
+\usepackage{pgfplots}	
+\pgfplotsset{compat=newest}
+%\usetikzlibrary{arrows.meta}
+
+\usepackage{listings}%插入代码
+\usepackage{color}
+\lstset{%代码格式的配置
+extendedchars=false,            % Shutdown no-ASCII compatible
+language=Matlab,                % ！！！选择代码的语言
+basicstyle=\footnotesize\tt,    % the size of the fonts that are used for the code
+tabsize=3,                            % sets default tabsize to 3 spaces
+numbers=left,                   % where to put the line-numbers
+numberstyle=\tiny,              % the size of the fonts that are used for the line-numbers
+stepnumber=1,                   % the step between two line-numbers. If it's 1 each line
+                                % will be numbered
+numbersep=5pt,                  % how far the line-numbers are from the code   %
+keywordstyle=\color[rgb]{0,0,1},                % keywords
+commentstyle=\color[rgb]{0.133,0.545,0.133},    % comments
+stringstyle=\color[rgb]{0.627,0.126,0.941},      % strings
+backgroundcolor=\color{white}, % choose the background color. You must add \usepackage{color}
+showspaces=false,               % show spaces adding particular underscores
+showstringspaces=false,         % underline spaces within strings
+showtabs=false,                 % show tabs within strings adding particular underscores
+frame=single,                   % adds a frame around the code
+captionpos=b,                   % sets the caption-position to bottom
+breaklines=true,                % sets automatic line breaking
+breakatwhitespace=false,        % sets if automatic breaks should only happen at whitespace
+title=\lstname,                 % show the filename of files included with \lstinputlisting;
+                                % also try caption instead of title
+mathescape=true,escapechar=?    % escape to latex with ?..?
+escapeinside={\%*}{*)},         % if you want to add a comment within your code
+%columns=fixed,                  % nice spacing
+%morestring=[m]',                % strings
+%morekeywords={%,...},%          % if you want to add more keywords to the set
+%    break,case,catch,continue,elseif,else,end,for,function,global,%
+%    if,otherwise,persistent,return,switch,try,while,...},%
+ }
+%% 页眉
+\usepackage{fancyhdr}
+\newcommand{\myname}{李佳}
+\newcommand{\myid}{2100010793}
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{\myid}
+\lhead{\myname}
+\cfoot{\thepage}
+
+%%%% Declare %%%
+\DeclareMathOperator{\Ran}{Ran}
+\DeclareMathOperator{\Dom}{Dom}
+\DeclareMathOperator{\Rank}{Rank}
+
+\newcommand{\md}{\mathrm{d}}
+\newcommand{\mR}{\mathbb{R}}
+\newcommand{\mbF}{\mathbb{F}}
+%%% Declare %%%
+\newtheorem{innercustomthm}{Problem}
+\newenvironment{prob}[1]
+{\renewcommand\theinnercustomthm{#1}\innercustomthm}
+{\endinnercustomthm}
+
+%%设置
+\title{随机模拟方法$\ \ $第一次大作业}
+\author{李佳~2100010793}
+\date{}
+
+%%正文
+
+\begin{document}
+\zihao{-4}
+\maketitle
+\begin{section}{问题描述}
+   使用Monte Carlo方法, 研究$N\times N$带周期边界条件的二维Potts模型的相变现象. $q$个状态的Potts模型的Hamiltonian定义为
+   $$H(\sigma)=-J\sum_{\langle i,j\rangle}\delta_{\sigma_i\sigma_j}-h\sum_i \sigma_i,\ \ i=1,2,...,N^2$$
+   其中$\sigma_i = 1,2,...,q$. 本报告取$q=3$作为具体算例研究下列问题:
+
+   \noindent(a) 取$J=1,k_B=1,h=0$. 作出内能$u$ $$u = \frac{U}{N^2}\ \ \text{其中  } U=\langle H\rangle = \frac{1}{Z}\sum_\sigma H(\sigma)\exp(-\beta H(\sigma))$$
+   以及比热$c$ $$u = \frac{C}{N^2}\ \ \text{其中  } C=k_B\beta^2 Var(H)$$
+   关于温度$T$的函数图像, 其中$\beta=(k_BT)^{-1}$, 配分函数$Z=\sum_\sigma\exp(-\beta H(\sigma))$. 在$N$充分大时, 确定相变的临界温度(critical temperature)$T_\ast$.
+
+   \noindent(b) 对不同的温度$T$, 作出磁化强度$$m=\frac{M}{N^2}\ \ \text{其中  }M=\langle \sum_i\sigma_i\rangle$$
+   关于$h$的函数图像. 对这些图像作出一些说明.
+
+   \noindent(c) 定义空间关联函数$$C(i,j) = \langle\sigma_i\sigma_j\rangle-\langle\sigma_i\rangle\langle\sigma_j\rangle$$
+   及关联长度(Correlation Length)$\xi$, 作为函数$\Gamma(k) = C(i,j)\bigg|_{|i-j|=k}$衰减至0的特征长度. 可以通过计算平均以近似得到$\Gamma(k)$
+   $$\Gamma(k) = \frac{1}{4N^2}\sum_i\sum_{j\in S_i}C(i,j),$$
+   其中$S_i = \{j|i-j=\pm(k,0)\ or\ \pm(0,k)\}$. 关联长度可通过以下式子定义:
+   $$\Gamma(k)\propto \Gamma_0\exp(-k/\xi),\ \ k\gg 1.$$
+   在$h=0$时, 研究$\xi$作为$T$的函数.
+
+   \noindent(d) 在$h=0$时, 考察$c,\xi$在临界温度$T_\ast$附近的行为. 假设有
+   $$c\sim c_0\epsilon^{-\gamma}\ and\ \xi\sim\xi_0\epsilon^{-\delta},$$
+   其中$\epsilon=|1-\frac{T}{T_\ast}|$. 数值地求出指数$\gamma,\delta$.
+
+   \noindent(e) 考察3维情形下的上述问题.
+\end{section}
+\begin{section}{思路及计算步骤}
+    计算上述问题的思路是:
+
+    \noindent\textbf{1.} 预运行. 固定参数, 使用MCMC方法将初始样本迭代充分多次, 使之尽可能达到不变分布.
+    
+    \noindent\textbf{2.} 采样. 固定参数, 使用MCMC方法生成充分多的样本用于计算.
+    
+    \noindent\textbf{3.} 计算物理量. 对每次采样的样本计算相关的物理量, 并在采样结束后作平均, 得到宏观量.
+    
+    \noindent\textbf{4.} 数据处理. 根据想要得到的物理规律, 对数据进行变换, 用最小二乘的方法数值确定相关参数.
+
+    \
+\end{section}
+\begin{section}{数值方法、分析及遇到的困难}    
+    \begin{subsection}{Metropolis算法}
+        Metropolis算法是经典的MCMC算法, 将目标分布作为一个Markov链的不变分布, 利用Markov链趋向于不变分布及遍历性的
+        特点, 在运行较长时间、近似为不变分布的Markov链上采样, 即可近似得到目标分布.
+
+        对于Potts模型, Proposal $Q(\sigma\to\sigma')$可采用Metropolis的"Single Flip"(Gibbs Sampling), 即每一次采样均匀地随机选取$\sigma$一个位点(site), 
+        再均匀地随机选取$1,2,...,q$中的一个状态(state)作为$\sigma'$在该位点的状态. 其接受(Decision)概率为
+        $$A(\sigma\to\sigma') = \min(1,\exp(-\beta\Delta H)),\ \ \Delta H = H(\sigma')-H(\sigma).$$
+        此时满足细致平衡条件.
+
+        这一算法的好处是每次仅改变一个位点的状态, 因此在已知上一个样本的物理量时, 可以有效率地更新得到新样本的物理量, 如Hamiltonian, 磁化强度(Magnetization)等.
+
+        然而, 在临界温度附近, 在笔者尝试多次后, 遇到的困难是: 传统的Metropolis方法即使进行大量采样, 依然容易出现较大的统计噪声. 这是因为, 在临界温度附近发生相变, 大量的位点的关联增强, 
+        使用Metropolis每次只翻转一个位点, 每次的Proposal极容易失败. 但此时的整体状态又与低温情形不同, 依然有许多种整体状态未被采样, 导致采样不充分. 文献大多将其称为"critical slow down".
+         巨大的采样时间开销不利于我们提高$N$的大小及推广到3维情形, 因此对临界温度及低温情形, 需要特别地处理.
+    \end{subsection}
+    \begin{subsection}{Wolff算法}
+        Wolff算法是Swendsen-Wang算法的改进, 它们都是聚类型的算法. 其想法是, 在临界温度附近, 位点相关性强, 呈团簇状, 因此可以考虑将一整片相同状态的位点一起改变, 以加快采样效率. 对于本报告考虑的Potts模型对应的Wolff算法, 每次的Proposal
+        均匀地随机选择一个位点$i$, 在其周围递归地生成一个聚类$C$ (cluster): 
+        \begin{itemize}
+            \item 选取与现有$C^{(old)}$中某位点$j$相邻的未检查过的位点$k$, 若$j,k$相同状态, 则以$1-\exp(\beta J)$的概率连接$j,k$, 即将$k$加入$C^{(old)}$中得到$C^{(new)}$.(若状态相同但连接失败, 则不算在被检查过的里面)
+            \item 若与$C^{(old)}$相邻的位点均被检查过, 则停止递归.
+        \end{itemize}
+        之后, 设得到的聚类$C$共$m$个元素, 且状态均为$s_1$, 则以如下的概率选择新的状态$s_2$( $s_2=1,2,...,q$ ), 并以概率1接受(Decision):
+        $$p_{s_2} \propto \exp(\beta h m s_2)$$
+        容易验证, 假设聚类$C$附近共$n_1$个位点状态$s_1$, $n_2$位点状态$s_2$, 则由
+        $$A(\sigma\to\sigma')=\min(1,\frac{\pi(\sigma')Q(\sigma'\to\sigma)}{\pi(\sigma)Q(\sigma\to\sigma')}),$$
+        $$\frac{\pi(\sigma')}{\pi(\sigma)} = \frac{\exp(\beta J n_2 + \beta h m s_2)}{\exp(\beta J n_1 + \beta h m s_1)},\ \ \frac{Q(\sigma'\to\sigma)}{Q(\sigma\to\sigma')} = \frac{\exp(-\beta J n_2 + \beta h m s_1)}{\exp(-\beta J n_1 + \beta h m s_2)},$$
+        可知$A(\sigma\to\sigma')=1$是满足细致平衡条件的.
+
+        这一算法的优点是, 在低温及临界温度时可以更有效率地进行采样. 缺点是, 由于每次的更新位点数量较多, 因此更新物理量的效率会降低. 以及在高温情形, 由于各位点的弱相关性, 聚类每次可能只更新一个点. 
+    \end{subsection}
+    
+    综上, 本报告的采样策略是: 对临界温度以上的温度使用传统的Metropolis算法, 以提高更新物理量的效率; 对低温及临界温度附近, 采用Wolff算法, 以提高采样的效率.
+
+\end{section}
+\begin{section}{具体实现细节}
+    \begin{subsection}{Metropolis算法的初值}
+        一般有两种初始的选择: 一种是完全确定的初值(例如设置初值为全为1的方阵), 另一种是完全随机的初值(方阵每个元素均服从$1-q$均匀分布). 这两种初值分别对应于
+        Metropolis算法中温度为0和$+\infty$的分布. 因此, 取对应的初值时, 应考虑采样的样本设置的温度大小, 越接近初值分布所对应的温度, 就需要越少的预运行次数, 也有利于减少采样过程中因不充分接近不变分布而引起的的噪声. 
+        本报告在计算数据时, 若采样样本温度较高, 则考虑完全随机的初值; 若温度较低, 则考虑完全确定的初值.
+
+        另外, 本报告在计算关于温度变化的数据时, 一般会将全体温度从高到底排序, 依次对每个温度进行计算. 我们考虑以完全随机的初值出发, 最开始计算最高温度的情形, 计算完毕后的样本作为次高温度的初值, 依次类推. 这样的想法类似模拟退火, 
+        每一次采样的初值都比较接近所需要的不变分布, 有利于减少预运行次数与误差.
+    \end{subsection}
+    \begin{subsection}{MCMC方法的预运行及采样次数}
+        对传统的Metropolis方法, 对$N\times N$的规模, 取预运行次数为$10\times N^2$, 取采样次数为$50\times N^2$;
+        对Wolff算法, 对$N\times N$的规模, 取预运行次数为$10\times N$, 取采样次数为$50\times N$次.
+    \end{subsection}
+    \begin{subsection}{物理量的计算}
+        为利用Metropolis Single Flip Proposal的好处, 每次采样后, 不必重新计算物理量, 而是将上一步的物理量进行更新即可. 例如对哈密顿量$H$, 
+        只需考虑一个位点的改变导致的能量变化.
+    \end{subsection}
+    \begin{subsection}{关联长度的计算}
+        关联长度需要计算的量包括$\langle\sigma_i\sigma_j\rangle$, $\langle\sigma_i\rangle$, $i,j=1,2,...,N^2$, 但$i-j=(\pm k,0),(0,\pm k)$,
+        因此不必将全部的$\langle\sigma_i\sigma_j\rangle$算出, 只需计算其中的$2\times N^3$个.
+    \end{subsection}
+    
+\end{section}
+
+\begin{section}{计算结果及分析}
+    \begin{subsection}{2维情形}
+
+    \noindent\textbf{(a) 内能与比热: 确定相变的临界温度}
+
+    通过程序采样计算物理量$u,c$, 可得内能、比热随温度的变化图如下所示:
+    \begin{figure}[!htbp]
+        \begin{minipage}[t]{0.5\linewidth}
+            \begin{tikzpicture}[scale=0.9]
+                \begin{axis}[xlabel=Temperature,  ylabel=Internal Energy $u$] % sharp plot: 折线图，通过修改此类型，即可完成多种图形绘制
+                    \addplot table {E80.dat}; % }
+                    
+
+                    % \label{plot_one}
+                    %\addlegendentry{CPU时间}
+                \end{axis}
+            \end{tikzpicture}
+            \caption{$N=80$时内能随温度变化图}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[t]{0.5\linewidth}
+            \begin{tikzpicture}[scale=0.9]
+                \begin{axis}[xlabel=Temperature,  ylabel=Specific Heat $c$] % sharp plot: 折线图，通过修改此类型，即可完成多种图形绘制
+                    \addplot table {c80.dat}; % }
+
+                    % \label{plot_two}
+                    %\addlegendentry{CPU时间}
+                \end{axis}
+            \end{tikzpicture}
+            \caption{$N=80$时比热随温度变化}
+        \end{minipage}
+    \end{figure}
+
+    \begin{figure}[!htbp]
+        \begin{minipage}[t]{0.5\linewidth}
+            \begin{tikzpicture}[scale=0.9]
+                \begin{axis}[xlabel=Temperature,  ylabel=Internal Energy $u$,
+                    legend entries = {$N=20$,$N=40$,$N=60$,$N=80$},
+                    legend style={at={(0.6,0.2)},anchor=west}] % sharp plot: 折线图，通过修改此类型，即可完成多种图形绘制
+                    \addplot table {E20.dat}; % }
+                    \addplot table {E40.dat};
+                    \addplot table {E60.dat};
+                    \addplot table {E80.dat};
+
+                    % \label{plot_one}
+                    %\addlegendentry{CPU时间}
+                \end{axis}
+            \end{tikzpicture}
+            \caption{$N$取不同值时内能随温度变化图}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[t]{0.5\linewidth}
+            \begin{tikzpicture}[scale=0.9]
+                \begin{axis}[xlabel=Temperature,  ylabel=Specific Heat $c$,
+                    legend entries = {$N=20$,$N=40$,$N=60$,$N=80$},
+                    legend style={at={(0.6,0.5)},anchor=west}] % sharp plot: 折线图，通过修改此类型，即可完成多种图形绘制
+                    \addplot table {c20.dat}; % }
+                    \addplot table {c40.dat};
+                    \addplot table {c60.dat};
+                    \addplot table {c80.dat};
+                    % \label{plot_two}
+                    %\addlegendentry{CPU时间}
+                \end{axis}
+            \end{tikzpicture}
+            \caption{$N$取不同值时比热随温度变化}
+        \end{minipage}
+    \end{figure}
+    
+    由上图可知,
+    \begin{itemize}
+        \item 由内能-温度曲线可看出: $q=3$时, 相变温度大约在$T=1$附近, 在这一温度段内, 内能迅速变化, 随温度增高而迅速增大. 但对较大的$N$与较小的$N$比较, 可以看到内能关于温度的曲线并没有发生间断, 内能在相变过程中依然是连续变化.
+        \item 由比热-温度曲线也可看出$q=3$时, 相变温度大约在$T=1$附近, 这一温度附近, 比热迅速增大, 而在该温度之外, 比热迅速减小. 由不同的$N$对应的曲线可看出, 随着$N$增大, 其最大值也增大, 因此有可能比热$c$在该温度处有间断现象, 可能趋于无穷大.
+    \end{itemize}
+
+    下面确定临界温度: 可以用以下的特征量来反映相变过程的发生:
+    \begin{itemize}
+        \item 对内能$u$, 其相变过程中关于温度的变化率非常大. 可以考虑将温度网格上各点处的$du/dT$近似为:
+        $$\frac{du}{dT}(T_i) \approx \frac{u(T_{i+1})-u(T_{i-1})}{T_{i+1}-T_{i-1}}$$
+        取离散温度序列中的最大值点作为临界温度.
+        \item 对比热$c$, 其相变过程中的值非常大. 为避免数据单点误差的污染, 考虑取平均
+        $$\bar{c}(T_i) = \frac{1}{3}(c(T_{i-1})+c(T_i)+c(T_{i-1}))$$
+        取离散温度序列中的最大值点作为临界温度.
+    \end{itemize}
+    由以上的两个判别法可分别得到不同$N$时对应的临界温度$T_\ast$
+    \begin{table}[!htbp]
+        \centering
+        \begin{tabular}{c|cccc}
+        criterion  & $n=20$ & $n=40$ & $n=60$ & $n=80$ \\ \hline
+        u & 1.01   & 0.99   & 1.00   & 1.00   \\
+        c & 0.99   & 1.00   & 1.00   & 1.00   \\ \hline
+        \end{tabular}
+        \caption{依据不同判别标准得到的临界温度值}
+    \end{table}
+
+    注意到$N$较大时, 数值确定的临界温度均为1.00, 因此对$q=3$, 取临界温度为1.00. 理论上, Potts模型的临界温度满足$\beta=\log(1+\sqrt{q})$, 对$k_B=1,q=3$的情形可得临界温度约0.995, 误差与之相差不到一个网格尺度. 这说明我们得到的临界温度是符合理论的.
+
+    \noindent\textbf{(b) 磁化强度: 随温度与系数$h$的变化}
+
+        通过采样计算物理量磁化强度(Magnetization), 我们发现其关于系数$h$的变化可根据温度分为三个阶段: $T>T_\ast$, $T\approx T_\ast$, $T<T_\ast$. 分别取$T=0.50,1.00,2.00$, 得到磁化强度$m$关于$h$的变化如图所示:
+        \begin{figure}[!htbp]
+        \begin{minipage}[t]{0.3\linewidth}
+            \begin{tikzpicture}[scale=0.6]
+                \begin{axis}[xlabel=$h$,  ylabel=Magnetization $m$,
+                    legend entries = {$N=20$,$N=40$,$N=80$},
+                    legend style={at={(0.6,0.2)},anchor=west}] % sharp plot: 折线图，通过修改此类型，即可完成多种图形绘制
+                    \addplot table {m20_05.dat}; % }
+                    \addplot table {m40_05.dat};
+                    \addplot table {m80_05.dat};
+
+                    % \label{plot_one}
+                    %\addlegendentry{CPU时间}
+                \end{axis}
+            \end{tikzpicture}
+            \caption{$T=0.5$, $N$取不同值时$m$随$h$变化图}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[t]{0.3\linewidth}
+            \begin{tikzpicture}[scale=0.6]
+                \begin{axis}[xlabel=$h$,  ylabel=Magnetization $m$,
+                    legend entries = {$N=20$,$N=40$,$N=80$},
+                    legend style={at={(0.6,0.2)},anchor=west}] % sharp plot: 折线图，通过修改此类型，即可完成多种图形绘制
+                    \addplot table {m20_1.dat}; % }
+                    \addplot table {m40_1.dat};
+                    \addplot table {m80_1.dat};
+
+                    % \label{plot_one}
+                    %\addlegendentry{CPU时间}
+                \end{axis}
+            \end{tikzpicture}
+            \caption{$T=1$, $N$取不同值时$m$随$h$变化图}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[t]{0.3\linewidth}
+            \begin{tikzpicture}[scale=0.6]
+                \begin{axis}[xlabel=$h$,  ylabel=Magnetization $m$,
+                    legend entries = {$N=20$,$N=40$,$N=80$},
+                    legend style={at={(0.6,0.2)},anchor=west}] % sharp plot: 折线图，通过修改此类型，即可完成多种图形绘制
+                    \addplot table {m20_2.dat}; % }
+                    \addplot table {m40_2.dat};
+                    \addplot table {m80_2.dat};
+
+                    % \label{plot_one}
+                    %\addlegendentry{CPU时间}
+                \end{axis}
+            \end{tikzpicture}
+            \caption{$T=2$, $N$取不同值时$m$随$h$变化图}
+        \end{minipage}
+    \end{figure}
+
+    由图可知, 
+    \begin{itemize}
+        \item $T<T_\ast$阶段, 在$h=0$处磁化强度发生间断. 这是由于低温时, 为达到最低能量, 各个位点将倾向于有相同的状态, 而$h$的正负决定位点共同取哪一个状态. $h>0$时, 最低能量时各位点均取值$q$, 反之则取$1$. 
+        \item $T> T_\ast$阶段, 处于相对混沌无序的状态, 温度较高, 导致各位点不会被强有力地束缚在一起, 因此各个位点的状态不会被$h$的符号几乎完全决定, 从而磁化强度没有发生间断. $h$增大时, 能量低处倾向于更大的状态数, 从而磁化强度关于$h$单调增加.
+        \item $T\approx T_\ast$阶段, 处于相变临界温度阶段, 由图可看出, 磁化强度的间断正在形成但还未完全形成. 此时相同状态的位点呈片状, 但不是几乎所有位点都在相同状态, 因而保留了上面两种阶段各自的部分特征.
+    \end{itemize}
+
+    \noindent\textbf{(c) 关联长度: 关于距离的衰减率}
+
+    通过采样可计算出各温度下的$\Gamma(k)$. 为确定$\Gamma(k)=\Gamma_0 \exp(-k/\xi)$中的特征长度$\xi$, 考虑对$k\in[N/8,N/4]$对应的$\log(\Gamma(k))$作最小二乘的线性拟合, 关联长度$\xi$被数值地确定
+    为拟合直线的斜率的负倒数. 以$N=20, T=1.5$为例, 可得Figure 8.
+        \begin{figure}[!htbp]
+        \begin{minipage}[t]{0.5\linewidth}
+            \begin{tikzpicture}[scale=0.9]
+                \begin{axis}[xlabel=$k$,  ylabel=Correlation Function $C$] % sharp plot: 折线图，通过修改此类型，即可完成多种图形绘制
+                    \addplot table {Coreg_20_53.dat}; % }
+
+                    % \label{plot_one}
+                    %\addlegendentry{CPU时间}
+                \end{axis}
+            \end{tikzpicture}
+            
+        \end{minipage}
+        \hfill
+        \begin{minipage}[t]{0.5\linewidth}
+            \begin{tikzpicture}[scale=0.9]
+                \begin{semilogyaxis}[xlabel=$k$,  ylabel=Correlation Function $C$] % sharp plot: 折线图，通过修改此类型，即可完成多种图形绘制
+                    \addplot table {Coreg_20_53.dat}; % }
+
+                    % \label{plot_one}
+                    %\addlegendentry{CPU时间}
+                \end{semilogyaxis}
+            \end{tikzpicture}
+            
+        \end{minipage}
+        \caption{$N=20,T=1.5$时关联函数随距离$k$变化图}
+    \end{figure}
+
+    在对数坐标图中作最小二乘可确定该温度对应的关联长度$\xi(T)$. 依此方法可作出相关长度$\xi$关于温度$T$的变化图. 为便于展示结果, 当$T\geq T_\ast$时如Figure 9所示, $T<T_\ast$时如Table 2所示:
+    \begin{figure}
+        \begin{minipage}[t]{0.3\linewidth}
+            \begin{tikzpicture}[scale=0.6]
+                \begin{axis}[xlabel=Temperature $T$,  ylabel=Correlation Length $\xi$,
+                    legend entries = {$N=20$}] % sharp plot: 折线图，通过修改此类型，即可完成多种图形绘制
+                    \addplot table {Cor_20.dat}; % }
+                    % \label{plot_one}
+                    %\addlegendentry{CPU时间}
+                \end{axis}
+            \end{tikzpicture}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[t]{0.3\linewidth}
+            \begin{tikzpicture}[scale=0.6]
+                \begin{axis}[xlabel=Temperature $T$,  ylabel=Correlation Length $\xi$,
+                    legend entries = {$N=40$}] % sharp plot: 折线图，通过修改此类型，即可完成多种图形绘制
+                    \addplot[red,mark=square*] table {Cor_40.dat}; % }
+                    % \label{plot_one}
+                    %\addlegendentry{CPU时间}
+                \end{axis}
+            \end{tikzpicture}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[t]{0.3\linewidth}
+            \begin{tikzpicture}[scale=0.6]
+                \begin{axis}[xlabel=Temperature $T$,  ylabel=Correlation Length $\xi$,
+                    legend entries = {$N=60$}] % sharp plot: 折线图，通过修改此类型，即可完成多种图形绘制
+                    \addplot[brown,mark=square*] table {Cor_60.dat}; % }
+                    % \label{plot_one}
+                    %\addlegendentry{CPU时间}
+                \end{axis}
+            \end{tikzpicture}
+        \end{minipage}
+            
+        
+        \caption{$N$取不同值时, 关联长度随温度变化图}
+    \end{figure}
+
+    \begin{table}[!htbp]
+        \centering
+        \begin{tabular}{c|ccc}
+        $\xi$  & $T=0.40$   & $T=0.60$   & $T=0.80$  \\ \hline
+        $N=20$ & 7.019 e+03  & 2.256 e+02  & 2.905 e+01 \\
+        $N=40$ & 2.552 e+04 & 7.400 e+02  & 8.913 e+01 \\
+        $N=60$ & 4.332 e+04 & 1.278 e+03 & 1.516 e+02 \\ \hline
+        \end{tabular}
+        \caption{$N$取不同值, $T<T_\ast$ 关联长度随温度变化表}
+    \end{table}
+
+    由图表可知:
+    \begin{itemize}
+        \item 当$T>T_\ast$时, 相关长度相对较小; 这是由于$T$较大时, 系统整体相对无序, 单个位点的变化是多见的, 两两之间的相关性较低, 因此相关长度较小; 
+        \item 当$T\approx T_\ast$时, 温度越靠近临界温度$T_\ast$, 相关长度越大, 且在$T_\ast$附近快速增大； 这是因为趋近于临界温度时, 相同状态的位点呈片状出现, 两两之间的相关性增强;
+        \item 当$T<T_\ast$时, 温度较低, 为达到较低的能量, 各位点趋向于取值相同, 两两相关性均很强, 因此相关长度远大于前面的情形.
+    \end{itemize}
+
+    \noindent\textbf{(d) 比热与关联长度服从的规律}
+
+    由于假设比热与相关长度在临界温度附近服从幂律, 因此作双对数坐标图, 得到结果如图 Figure 10,11 所示:
+    用最小二乘的方法数值确定双对数图中线性拟合的斜率, 可数值确定参数$\gamma,\delta$, 并得到线性拟合的相关系数平方$r^2$如表 Table 3,4 所示:
+
+    \begin{figure}
+        \begin{minipage}[t]{0.3\linewidth}
+            \begin{tikzpicture}[scale=0.6]
+                \begin{loglogaxis}[xlabel= $|1-T/T_\ast|$,  ylabel=Specific Heat $c$,
+                    legend entries = {$N=20$,Least Square Fit Line}] % sharp plot: 折线图，通过修改此类型，即可完成多种图形绘制
+                    \addplot+[only marks] table {ct_20.dat}; % }
+                    \addplot+[red,no markers] table {ctfit_20.dat}; 
+                    % \label{plot_one}
+                    %\addlegendentry{CPU时间}
+                \end{loglogaxis}
+            \end{tikzpicture}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[t]{0.3\linewidth}
+            \begin{tikzpicture}[scale=0.6]
+                \begin{loglogaxis}[xlabel= $|1-T/T_\ast|$,  ylabel=Specific Heat $c$,
+                    legend entries = {$N=40$,Least Square Fit Line}] % sharp plot: 折线图，通过修改此类型，即可完成多种图形绘制
+                    \addplot+[only marks] table {ct_40.dat}; % }
+                    \addplot+[red,no markers] table {ctfit_40.dat}; 
+                    % \label{plot_one}
+                    %\addlegendentry{CPU时间}
+                \end{loglogaxis}
+            \end{tikzpicture}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[t]{0.3\linewidth}
+            \begin{tikzpicture}[scale=0.6]
+                \begin{loglogaxis}[xlabel= $|1-T/T_\ast|$,  ylabel=Specific Heat $c$,
+                    legend entries = {$N=60$,Least Square Fit Line}] % sharp plot: 折线图，通过修改此类型，即可完成多种图形绘制
+                    \addplot+[only marks,blue] table {ct_60.dat}; % }
+                    \addplot+[red,no markers] table {ctfit_60.dat}; 
+                    % \label{plot_one}
+                    %\addlegendentry{CPU时间}
+                \end{loglogaxis}
+            \end{tikzpicture}
+        \end{minipage}
+        \caption{$N$取不同值时, 比热随温度变化图}
+    \end{figure}
+
+    \begin{table}[!htbp]
+        \centering
+        \begin{tabular}{c|ccc}
+                 & $N=20$ & $N=40$ & $N=60$ \\ \hline
+        $\gamma$ & 0.7604 & 0.7166 & 0.6595 \\
+        $r^2$    & 0.9479 & 0.7877 & 0.8090 \\ \hline
+        \end{tabular}
+        \caption{$N$取不同值时, 比热的幂律参数$\gamma$及线性拟合的$r^2$}
+    \end{table}
+
+    \begin{figure}
+        \begin{minipage}[t]{0.3\linewidth}
+            \begin{tikzpicture}[scale=0.6]
+                \begin{loglogaxis}[xlabel= $|1-T/T_\ast|$,  ylabel=Correlation Length $\xi$,
+                    legend entries = {$N=20$,Least Square Fit Line}] % sharp plot: 折线图，通过修改此类型，即可完成多种图形绘制
+                    \addplot+[only marks,blue] table {CL_20.dat}; % }
+                    \addplot+[red,no markers] table {CLfit_20.dat}; 
+                    % \label{plot_one}
+                    %\addlegendentry{CPU时间}
+                \end{loglogaxis}
+            \end{tikzpicture}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[t]{0.3\linewidth}
+            \begin{tikzpicture}[scale=0.6]
+                \begin{loglogaxis}[xlabel= $|1-T/T_\ast|$,  ylabel=Correlation Length $\xi$,
+                    legend entries = {$N=40$,Least Square Fit Line}] % sharp plot: 折线图，通过修改此类型，即可完成多种图形绘制
+                    \addplot+[only marks,blue] table {CL_40.dat}; % }
+                    \addplot+[red,no markers] table {CLfit_40.dat}; 
+                    % \label{plot_one}
+                    %\addlegendentry{CPU时间}
+                \end{loglogaxis}
+            \end{tikzpicture}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[t]{0.3\linewidth}
+            \begin{tikzpicture}[scale=0.6]
+                \begin{loglogaxis}[xlabel= $|1-T/T_\ast|$,  ylabel=Correlation Length $\xi$,
+                    legend entries = {$N=60$,Least Square Fit Line}] % sharp plot: 折线图，通过修改此类型，即可完成多种图形绘制
+                    \addplot+[only marks,blue] table {CL_60.dat}; % }
+                    \addplot+[red,no markers] table {CLfit_60.dat}; 
+                    % \label{plot_one}
+                    %\addlegendentry{CPU时间}
+                \end{loglogaxis}
+            \end{tikzpicture}
+        \end{minipage}
+        \caption{$N$取不同值时, 关联长度随温度变化图}
+    \end{figure}
+
+    \begin{table}[!htbp]
+        \centering
+        \begin{tabular}{c|ccc}
+                 & $n=20$ & $n=40$ & $n=60$ \\ \hline
+        $\delta$ & 0.3738 & 0.3833 & 0.4388 \\
+        $r^2$    & 0.9884 & 0.9537 & 0.9588 \\ \hline
+        \end{tabular}
+        \caption{$N$取不同值时, 关联长度的幂律参数$\delta$及线性拟合的$r^2$}
+        \end{table}
+    
+        由图 Figure 10,11, 表 Table 3,4 可知:
+    \begin{itemize}
+        \item 能明显地观察到, 在双对数图中, 比热和关联长度在临界温度附近均有线性变化的性质, 且由线性拟合的$r^2$值可看出, 线性性质是相对良好的. 这意味着数值上, 它们均在临界温度附近服从幂律. 
+        \item 对不同的$N$得到的幂律参数$\gamma,\delta$, 我们可以数值地确定 $\gamma\approx 0.7121,\ \delta\approx 0.3986$. 
+        \item 由计算结果可以看出, 不同的$N$得到的参数依然有一定差别. 说明临界温度附近的计算容易带来误差污染, 要么需要大量的采样, 要么需要更好的算法生成样本. 
+    \end{itemize}
+\end{subsection}
+
+\begin{subsection}{3维情形}
+    \noindent\textbf{(a) 内能与比热: 确定相变的临界温度}
+
+    对$N=10,20$的情形计算内能与比热, 用类似的判定方法判别临界温度, 得到结果如图所示:
+
+    \begin{figure}[!htbp]
+        \begin{minipage}[t]{0.5\linewidth}
+            \begin{tikzpicture}[scale=0.9]
+                \begin{axis}[xlabel=Temperature,  ylabel=Internal Energy $u$,
+                    legend entries = {$N=10$,$N=20$},
+                    legend style={at={(0.6,0.2)},anchor=west}] % sharp plot: 折线图，通过修改此类型，即可完成多种图形绘制
+                    \addplot table {u_10_3d.dat}; % }
+                    \addplot table {u_20_3d.dat};
+
+                    % \label{plot_one}
+                    %\addlegendentry{CPU时间}
+                \end{axis}
+            \end{tikzpicture}
+            \caption{$N=10,20$时内能随温度变化图}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[t]{0.5\linewidth}
+            \begin{tikzpicture}[scale=0.9]
+                \begin{axis}[xlabel=Temperature,  ylabel=Specific Heat $c$,
+                    legend entries = {$N=10$,$N=20$},
+                    legend style={at={(0.66,0.8)},anchor=west}] % sharp plot: 折线图，通过修改此类型，即可完成多种图形绘制
+                    \addplot table {c_10_3d.dat}; % }
+                    \addplot table {c_20_3d.dat};
+                    % \label{plot_two}
+                    %\addlegendentry{CPU时间}
+                \end{axis}
+            \end{tikzpicture}
+            \caption{$N=10,20$时比热随温度变化}
+        \end{minipage}
+    \end{figure}
+
+    \begin{table}[!htbp]
+        \centering
+        \begin{tabular}{c|cc}
+        criterion  & $n=10$ & $n=20$  \\ \hline
+        u & 1.83   & 1.81   \\
+        c & 1.80  & 1.80   \\ \hline
+        \end{tabular}
+        \caption{依据不同判别标准得到的临界温度值}
+    \end{table}
+
+    由表可知, 此时可取临界温度为均值$1.81$.
+
+    直观上可观察到:
+    \begin{itemize}
+        \item 3维情形的内能曲线在临界温度变化很快, 依然关于温度单调增加, 但直观上观察可能出现间断点;
+        \item 比热在临界温度附近发生了明显的间断, 左侧极限大于右侧极限.
+    \end{itemize}
+    但由于未能计算更大规模的情形, 这些观察未能佐证.
+
+    \noindent\textbf{(b) 磁化强度: 随温度与系数$h$的变化}
+
+    \begin{figure}[!htbp]
+        \begin{minipage}[t]{0.3\linewidth}
+            \begin{tikzpicture}[scale=0.6]
+                \begin{axis}[xlabel=$h$,  ylabel=Magnetization $m$] % sharp plot: 折线图，通过修改此类型，即可完成多种图形绘制
+                    \addplot table {m_1_3d.dat}; % }
+                    
+
+                    % \label{plot_one}
+                    %\addlegendentry{CPU时间}
+                \end{axis}
+            \end{tikzpicture}
+            \caption{$T=1<T_\ast$, $N=10$时$m$随$h$变化图}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[t]{0.3\linewidth}
+            \begin{tikzpicture}[scale=0.6]
+                \begin{axis}[xlabel=$h$,  ylabel=Magnetization $m$] % sharp plot: 折线图，通过修改此类型，即可完成多种图形绘制
+                    \addplot table {m_18_3d.dat}; % }
+
+                    % \label{plot_one}
+                    %\addlegendentry{CPU时间}
+                \end{axis}
+            \end{tikzpicture}
+            \caption{$T=1.8\approx T_\ast$, $N=10$时$m$随$h$变化图}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[t]{0.3\linewidth}
+            \begin{tikzpicture}[scale=0.6]
+                \begin{axis}[xlabel=$h$,  ylabel=Magnetization $m$] % sharp plot: 折线图，通过修改此类型，即可完成多种图形绘制
+                    \addplot table {m_3_3d.dat}; % }
+                    
+
+                    % \label{plot_one}
+                    %\addlegendentry{CPU时间}
+                \end{axis}
+            \end{tikzpicture}
+            \caption{$T=3>T_\ast$, $N=10$时$m$随$h$变化图}
+        \end{minipage}
+    \end{figure}
+
+    由图 Figure 14,15,16 可知, 3维情形磁化强度随$h$的变化与二维类似, 均在$T<T_\ast, T\approx T_\ast, T>T_\ast$三个阶段有较分明的差异.
+    
+    \noindent\textbf{(c) 关联长度}
+
+    对$N=10$的情形计算. 与二维情形类似, 对$k\in[1,4]$作最小二乘的线性拟合得到各温度对应的关联长度, $T\geq T_\ast$如图 Figure 17 所示, $T<T_\ast$如表 Table 6 所示:
+
+    \begin{figure}[!htbp]
+        \centering
+            \begin{tikzpicture}[scale=0.9]
+                \begin{axis}[xlabel=Temperature $T$,  ylabel=Correlation Length $\xi$] % sharp plot: 折线图，通过修改此类型，即可完成多种图形绘制
+                    \addplot table {Cor_3d.dat}; % }
+                    % \label{plot_one}
+                    %\addlegendentry{CPU时间}
+                \end{axis}
+            \end{tikzpicture}
+        
+        \caption{$N=10$时, 关联长度随温度变化图}
+    \end{figure}
+
+    \begin{table}[!htbp]
+        \centering
+        \begin{tabular}{c|cccccc}
+              & $T=0.50$  & $T=0.75$  & $T=1.00$  & $T=1.25$  & $T=1.50$  & $T=1.75$ \\ \hline
+        $\xi$ & 7.576 e+4 & 1.631 e+3 & 2.010 e+2 & 4.760 e+1 & 1.580 e+1 & 4.610   
+        \end{tabular}
+        \caption{$N=10$时, 关联长度随温度变化表}
+    \end{table}
+    
+    由图表可知, 关联长度关于温度的变化与二维情形类似, 依然当$T>T_\ast$时, 关联长度相对较小; 当$T\approx T_\ast$时, 温度越靠近临界温度$T_\ast$, 关联长度越大. 并且当$T<T_\ast$时, 
+    温度较低, 为达到较低的能量, 各位点趋向于取值相同, 两两相关性均很强, 关联长度远大于较高温度的情形.
+    
+
+    \noindent\textbf{(d) 比热与关联长度服从的规律}
+
+    对$N=10$情形的比热与关联长度进行数据处理, 在双对数图中观察其特征, 如下图所示:
+
+    \begin{figure}[!htbp]
+       \centering
+        \begin{tikzpicture}[scale=0.9]
+            \begin{loglogaxis}[xlabel= $|1-T/T_\ast|$,  ylabel=Specific Heat $c$,
+                legend entries = {$T<T_\ast$,$T>T_\ast$,Least Square Fit Line},
+                legend style={at={(1.2,0.6)},anchor=west}] % sharp plot: 折线图，通过修改此类型，即可完成多种图形绘制
+                \addplot+[blue,only marks] table {ct_3d.dat}; % }
+                \addplot+[purple,only marks] table {ct_3d_right.dat};
+                \addplot+[red,no markers] table {ctfit_3d.dat}; 
+                % \label{plot_one}
+                %\addlegendentry{CPU时间}
+            \end{loglogaxis}
+        \end{tikzpicture}
+        \caption{$N=10$时比热随温度变化图}
+    \end{figure}
+
+    \begin{figure}[!htbp]
+        \centering
+        \begin{tikzpicture}[scale=0.9]
+            \begin{loglogaxis}[xlabel= $|1-T/T_\ast|$,  ylabel=Correlation Length $\xi$,
+                legend entries = {$N=10$,Least Square Fit Line},
+                legend style={at={(1.2,0.6)},anchor=west}] % sharp plot: 折线图，通过修改此类型，即可完成多种图形绘制
+                \addplot+[only marks,blue] table {CL_3d.dat}; % }
+                \addplot+[red,no markers] table {CLfit_3d.dat}; 
+                % \label{plot_one}
+                %\addlegendentry{CPU时间}
+            \end{loglogaxis}
+        \end{tikzpicture}
+    
+        \caption{$N=10$时, 关联长度随温度变化图}
+    \end{figure}
+
+    最小二乘得到的结果为:
+    \begin{itemize}
+        \item 比热: $\gamma= 0.8748$, $r^2=0.6066$.
+        \item 关联长度: $\delta = 0.3359$, $r^2 = 0.9695$.
+    \end{itemize}
+
+    由图及数据可看出:
+    \begin{itemize}
+        \item 3维情形的比热在临界温度处可能发生间断, 导致临界温度左右两侧的比热变化不统一. 在图中可看出, 两侧比热差异较大, 这导致双对数图中的线性拟合结果较差.
+        比热在其附近可能不服从幂律, 或在两侧分别服从不同的幂律.
+        \item 关联长度在临界温度附近, 在双对数图中有着明显的线性变化, 线性拟合的效果较好, 因此关联长度在临界温度附近可能仍服从幂律. 由$N=10$得到的幂律参数为$\delta=0.3359$, 但由于仅有一组数据, 这一参数可能不准确.
+    \end{itemize}
+\end{subsection}
+\end{section}
+\begin{section}{总结}
+    本报告使用 MCMC 方法对2维及3维 $q=3$ 的Potts模型进行数值计算,观察到了模型中产生的相变, 得到了一些宏观量随温度或随其它参数变化的特征. 主要遇到的困难, 在于临界温度附近的采样难以充分, 
+    容易引入统计误差, 通过使用聚类型的Wolff算法部分克服了这一困难. 计算得到的结果中, 部分物理量例如比热在2维与3维的情形有不同的变化情况, 需要进一步对更大规模的3维模型计算以证实. 这其中依然面临统计误差的问题, 
+    临界温度附近要么需要更大的采样数量, 要么需要更加高效的采样算法, 才能更精确地得到模型中物理量的相应规律.
+    
+\end{section}
+\end{document}
